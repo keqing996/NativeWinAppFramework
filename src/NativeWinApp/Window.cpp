@@ -1,15 +1,12 @@
-#include "../../include/NativeWinApp/Window.h"
-#include "../../include/NativeWinApp/WindowsDefine.h"
 
-#if PLATFORM_WINDOWS
+#include "Infra/Windows/WindowsDefine.hpp"
+#include "Infra/ScopeGuard.hpp"
+#include "Infra/String.hpp"
+#include "Infra/Logger.hpp"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Glad/Gl.h"
 
 #pragma comment(lib, "opengl32.lib")
-
-#include "../../ScopeGuard.hpp"
-#include "../../String.hpp"
-#include "../../Logger.hpp"
-
-#include "../../Windows/Glad/Gl.h"
 
 namespace Infra
 {
@@ -171,7 +168,7 @@ namespace Infra
 
         // Create window
         auto titleInWideStr = String::StringToWideString(title);
-        const wchar_t* titleWide = titleInWideStr.has_value() ? titleInWideStr->c_str() : L"Default Title";
+        const wchar_t* titleWide = titleInWideStr.c_str();
         _hWindow = ::CreateWindowW(
                 _sWindowRegisterName,
                 titleWide,
@@ -343,7 +340,7 @@ namespace Infra
     auto Window::SetTitle(const std::string& title) -> void
     {
         auto titleInWideStr = String::StringToWideString(title);
-        const wchar_t* titleWide = titleInWideStr.has_value() ? titleInWideStr->c_str() : L"Default Title";
+        const wchar_t* titleWide = titleInWideStr.c_str();
         ::SetWindowTextW(reinterpret_cast<HWND>(_hWindow), titleWide);
     }
 
@@ -480,5 +477,3 @@ namespace Infra
     }
 
 }
-
-#endif

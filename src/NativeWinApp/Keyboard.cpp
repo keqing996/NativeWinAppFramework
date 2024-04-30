@@ -1,9 +1,7 @@
-#include "../../include/NativeWinApp/Window.h"
-#include "../../include/NativeWinApp/WindowsDefine.h"
 
-#if PLATFORM_WINDOWS
-
-#include "../../Windows/Keyboard.h"
+#include "Infra/Windows/WindowsDefine.hpp"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Keyboard.h"
 
 namespace Infra
 {
@@ -245,5 +243,3 @@ namespace Infra
 
 
 }
-
-#endif

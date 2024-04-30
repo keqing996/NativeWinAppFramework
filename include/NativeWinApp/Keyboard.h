@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
 namespace Infra
 {
 
@@ -47,5 +43,3 @@ namespace Infra
 
 
 }
-
-#endif

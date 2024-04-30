@@ -1,10 +1,6 @@
 #pragma once
 
-#include "../../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
-#include "../../Windows/WindowsDefine.h"
+#include "Infra/Windows/WindowsDefine.hpp"
 
 namespace Infra
 {
@@ -29,5 +25,3 @@ namespace Infra
         HICON hIcon;
     };
 }
-
-#endif

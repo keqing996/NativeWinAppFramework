@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
 #include "Keyboard.h"
 #include "Mouse.h"
 
@@ -93,5 +89,3 @@ namespace Infra
         }
     };
 }
-
-#endif

@@ -1,12 +1,7 @@
-
-#include "../../include/NativeWinApp/WindowsDefine.h"
-
-#if PLATFORM_WINDOWS
-
 #include <shobjidl.h>
-#include "../../Windows/FileDialog.h"
-#include "../../String.hpp"
-#include "../../ScopeGuard.hpp"
+#include "Infra/String.hpp"
+#include "Infra/ScopeGuard.hpp"
+#include "NativeWinApp/FileDialog.h"
 
 namespace Infra
 {
@@ -19,8 +14,8 @@ namespace Infra
     FileTypeFilterW GetWideStringVersion(const FileDialog::FileTypeFilter& fileFilter)
     {
         return FileTypeFilterW {
-            String::StringToWideString(fileFilter.name).value(),
-            String::StringToWideString(fileFilter.suffix).value()
+            String::StringToWideString(fileFilter.name),
+            String::StringToWideString(fileFilter.suffix)
         };
     }
 
@@ -61,7 +56,7 @@ namespace Infra
             {
                 // title
                 const auto titleMsgW = String::StringToWideString(titleMsg);
-                if (FAILED(pFileDialog->SetTitle(titleMsgW->c_str())))
+                if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 
                 // filter
@@ -105,7 +100,7 @@ namespace Infra
             {
                 // title
                 const auto titleMsgW = String::StringToWideString(titleMsg);
-                if (FAILED(pFileDialog->SetTitle(titleMsgW->c_str())))
+                if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 
                 // filter
@@ -130,7 +125,7 @@ namespace Infra
 
                 // save name
                 const auto defaultNameW = String::StringToWideString(defaultName);
-                if (FAILED(pFileDialog->SetFileName(defaultNameW->c_str())))
+                if (FAILED(pFileDialog->SetFileName(defaultNameW.c_str())))
                     return std::nullopt;
 
                 // show
@@ -154,7 +149,7 @@ namespace Infra
             {
                 // title
                 const auto titleMsgW = String::StringToWideString(titleMsg);
-                if (FAILED(pFileDialog->SetTitle(titleMsgW->c_str())))
+                if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 
                 // set directory
@@ -172,5 +167,3 @@ namespace Infra
     }
 
 }
-
-#endif

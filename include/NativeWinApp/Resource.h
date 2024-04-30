@@ -1,10 +1,6 @@
 #pragma once
 
-#include "../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
-#include "../ResourcePtr.hpp"
+#include "Infra/ResourcePtr.hpp"
 
 namespace Infra
 {
@@ -23,5 +19,3 @@ namespace Infra
         ResPtr<T> LoadResource(int id);
     };
 }
-
-#endif

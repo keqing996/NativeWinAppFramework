@@ -1,9 +1,6 @@
-#include "../../include/NativeWinApp/Window.h"
-#include "../../include/NativeWinApp/WindowsDefine.h"
-
-#if PLATFORM_WINDOWS
-
-#include "../../Windows/Mouse.h"
+#include "Infra/Windows/WindowsDefine.hpp"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Mouse.h"
 
 namespace Infra
 {
@@ -59,5 +56,3 @@ namespace Infra
     }
 
 }
-
-#endif

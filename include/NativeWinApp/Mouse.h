@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
 #include <utility>
 
 namespace Infra
@@ -31,5 +27,3 @@ namespace Infra
     };
 
 }
-
-#endif

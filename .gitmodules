@@ -1,0 +1,3 @@
+[submodule "thirdparty/CppInfra"]
+	path = thirdparty/CppInfra
+	url = https://github.com/keqing996/CppHelper.git

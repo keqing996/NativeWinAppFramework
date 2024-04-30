@@ -1,9 +1,7 @@
-#include "../../include/NativeWinApp/Resource.h"
-
-#if PLATFORM_WINDOWS
-
 #include <vector>
-#include "ResourceHandle.h"
+#include "Infra/Windows/WindowsDefine.hpp"
+#include "NativeWinApp/Resource.h"
+#include "NativeWinApp/ResourceHandle.h"
 
 namespace Infra
 {
@@ -67,5 +65,3 @@ namespace Infra
         return result;
     }
 }
-
-#endif

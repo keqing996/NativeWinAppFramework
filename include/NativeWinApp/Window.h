@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../PlatformDefine.hpp"
-
-#if PLATFORM_WINDOWS
-
 #include "WindowEvent.h"
 #include <cstdint>
 #include <string>
@@ -109,5 +105,3 @@ namespace Infra
 
     };
 }
-
-#endif

@@ -1,12 +1,8 @@
-#include "../../include/NativeWinApp/Window.h"
-#include "../../include/NativeWinApp/WindowsDefine.h"
-
-#if PLATFORM_WINDOWS
-
-#include "../../ScopeGuard.hpp"
-#include "../../String.hpp"
-#include "../../Logger.hpp"
-#include "../../Windows/WindowEvent.h"
+#include "Infra/Windows/WindowsDefine.hpp"
+#include "Infra/ScopeGuard.hpp"
+#include "Infra/String.hpp"
+#include "Infra/Logger.hpp"
+#include "NativeWinApp/Window.h"
 
 namespace Infra
 {
@@ -284,5 +280,3 @@ namespace Infra
 
     }
 }
-
-#endif
