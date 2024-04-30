@@ -1,4 +1,4 @@
-#include "../../Windows/Resource.h"
+#include "../../include/NativeWinApp/Resource.h"
 
 #if PLATFORM_WINDOWS
 
