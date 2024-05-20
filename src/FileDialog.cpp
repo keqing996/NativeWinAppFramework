@@ -1,9 +1,8 @@
 #include <shobjidl.h>
-#include "Infra/String.hpp"
-#include "Infra/ScopeGuard.hpp"
+#include "NativeWinApp/Utility.h"
 #include "NativeWinApp/FileDialog.h"
 
-namespace Infra
+namespace NWA
 {
     struct FileTypeFilterW
     {
@@ -14,8 +13,8 @@ namespace Infra
     FileTypeFilterW GetWideStringVersion(const FileDialog::FileTypeFilter& fileFilter)
     {
         return FileTypeFilterW {
-            String::StringToWideString(fileFilter.name),
-            String::StringToWideString(fileFilter.suffix)
+            Utility::StringToWideString(fileFilter.name),
+            Utility::StringToWideString(fileFilter.suffix)
         };
     }
 

@@ -4,7 +4,7 @@
 #include <optional>
 #include <vector>
 
-namespace Infra
+namespace NWA
 {
     class FileDialog
     {

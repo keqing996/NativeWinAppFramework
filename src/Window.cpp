@@ -1,14 +1,14 @@
 
-#include "Infra/Windows/WindowsDefine.hpp"
-#include "Infra/ScopeGuard.hpp"
-#include "Infra/String.hpp"
-#include "Infra/Logger.hpp"
-#include "NativeWinApp/Window.h"
-#include "NativeWinApp/Glad/Gl.h"
+#include "../../src/Infra/Windows/WindowsDefine.hpp"
+#include "../../src/Infra/ScopeGuard.hpp"
+#include "../../src/Infra/String.hpp"
+#include "../../src/Infra/Logger.hpp"
+#include "../../src/NativeWinApp/Window.h"
+#include "../../src/NativeWinApp/Glad/Gl.h"
 
 #pragma comment(lib, "opengl32.lib")
 
-namespace Infra
+namespace NWA
 {
     class Support
     {
@@ -300,6 +300,30 @@ namespace Infra
         }
     }
 
+    auto Window::SetIcon(int iconResId) -> void
+    {
+        if (_hIcon != nullptr)
+            ::DestroyIcon(reinterpret_cast<HICON>(_hIcon));
+
+        _hIcon = nullptr;
+
+        _hIcon = ::LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCE(iconResId));
+        if (_hIcon != nullptr)
+        {
+            ::SendMessageW(
+                    reinterpret_cast<HWND>(_hWindow),
+                    WM_SETICON,
+                    ICON_BIG,
+                    reinterpret_cast<LPARAM>(_hIcon));
+
+            ::SendMessageW(
+                    reinterpret_cast<HWND>(_hWindow),
+                    WM_SETICON,
+                    ICON_SMALL,
+                    reinterpret_cast<LPARAM>(_hIcon));
+        }
+    }
+
     auto Window::SetWindowVisible(bool show) -> void
     {
         ::ShowWindow(reinterpret_cast<HWND>(_hWindow), show ? SW_SHOW : SW_HIDE);
@@ -426,7 +450,7 @@ namespace Infra
         }
     }
 
-    auto Window::SetWindowEventProcessFunction(const std::function<void(uint32_t, void*, void*)>& f) -> void
+    auto Window::SetWindowEventProcessFunction(const std::function<bool(void*, uint32_t, void*, void*)>& f) -> void
     {
         _winEventProcess = f;
     }

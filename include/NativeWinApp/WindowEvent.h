@@ -3,7 +3,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
-namespace Infra
+namespace NWA
 {
     struct WindowEvent
     {

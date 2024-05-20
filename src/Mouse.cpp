@@ -1,8 +1,8 @@
-#include "Infra/Windows/WindowsDefine.hpp"
-#include "NativeWinApp/Window.h"
-#include "NativeWinApp/Mouse.h"
+#include "../../src/Infra/Windows/WindowsDefine.hpp"
+#include "../../src/NativeWinApp/Window.h"
+#include "../../src/NativeWinApp/Mouse.h"
 
-namespace Infra
+namespace NWA
 {
     bool Mouse::IsButtonPressed(Button button)
     {

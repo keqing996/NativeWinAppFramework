@@ -2,7 +2,7 @@
 
 #include "Infra/Windows/WindowsDefine.hpp"
 
-namespace Infra
+namespace NWA
 {
     struct DataResource
     {

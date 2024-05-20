@@ -2,7 +2,7 @@
 
 #include "Infra/ResourcePtr.hpp"
 
-namespace Infra
+namespace NWA
 {
     struct DataResource;
     struct CursorResource;

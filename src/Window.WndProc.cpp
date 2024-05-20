@@ -1,17 +1,21 @@
-#include "Infra/Windows/WindowsDefine.hpp"
-#include "Infra/ScopeGuard.hpp"
-#include "Infra/String.hpp"
-#include "Infra/Logger.hpp"
-#include "NativeWinApp/Window.h"
+#include "../../src/Infra/Windows/WindowsDefine.hpp"
+#include "../../src/Infra/ScopeGuard.hpp"
+#include "../../src/Infra/String.hpp"
+#include "../../src/Infra/Logger.hpp"
+#include "../../src/NativeWinApp/Window.h"
 
-namespace Infra
+namespace NWA
 {
     void Window::WindowEventProcess(uint32_t message, void* wpara, void* lpara)
     {
-        WindowEventProcessInternal(message, wpara, lpara);
-
         if (_winEventProcess)
-            _winEventProcess(message, wpara, lpara);
+        {
+            bool handled = _winEventProcess(_hWindow, message, wpara, lpara);
+            if (handled)
+                return;
+        }
+
+        WindowEventProcessInternal(message, wpara, lpara);
     }
 
     void Window::WindowEventProcessInternal(uint32_t message, void* wpara, void* lpara)

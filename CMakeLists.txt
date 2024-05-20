@@ -1,22 +1,16 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(CppNativeWinApp)
+project (CppNativeWinApp)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CPP_NATIVE_WIN_APP_LIB cpp_native_win_app)
+set (CMAKE_CXX_STANDARD 20)
+set (CPP_NATIVE_WIN_APP_LIB cpp_native_win_app)
+set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/artifacts/${CMAKE_CXX_COMPILER_ID}/${CMAKE_BUILD_TYPE}/)
 
 # native window lib
 file (GLOB_RECURSE NATIVE_WIN_WINDOW_SRC ./src/*.cpp)
-add_library(${CPP_NATIVE_WIN_APP_LIB} STATIC
-        ${NATIVE_WIN_WINDOW_SRC}
-)
 
-target_include_directories(${CPP_NATIVE_WIN_APP_LIB} PUBLIC
-        ./include/
-        ./thirdparty/CppInfra/include/
-)
-
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/artifacts/)
+add_library                 (${CPP_NATIVE_WIN_APP_LIB} STATIC ${NATIVE_WIN_WINDOW_SRC})
+target_include_directories  (${CPP_NATIVE_WIN_APP_LIB} PUBLIC ./include/)
 
 # test proj
 add_executable          (test_window_style ./test/TestWindowStyle.cpp)

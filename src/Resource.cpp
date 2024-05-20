@@ -1,9 +1,9 @@
 #include <vector>
-#include "Infra/Windows/WindowsDefine.hpp"
-#include "NativeWinApp/Resource.h"
-#include "NativeWinApp/ResourceHandle.h"
+#include "NativeWinApp/Utility.h"
+#include "../../src/NativeWinApp/Resource.h"
+#include "../../src/NativeWinApp/ResourceHandle.h"
 
-namespace Infra
+namespace NWA
 {
     template<>
     ResPtr<DataResource> Resource::LoadResource(int id)

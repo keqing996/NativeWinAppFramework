@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Infra
+namespace NWA
 {
 
     class Keyboard

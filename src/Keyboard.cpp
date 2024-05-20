@@ -1,9 +1,9 @@
 
-#include "Infra/Windows/WindowsDefine.hpp"
-#include "NativeWinApp/Window.h"
-#include "NativeWinApp/Keyboard.h"
+#include "../../src/Infra/Windows/WindowsDefine.hpp"
+#include "../../src/NativeWinApp/Window.h"
+#include "../../src/NativeWinApp/Keyboard.h"
 
-namespace Infra
+namespace NWA
 {
     bool Keyboard::IsKeyPressed(Key key)
     {

@@ -7,7 +7,7 @@
 #include <optional>
 #include <functional>
 
-namespace Infra
+namespace NWA
 {
     enum class WindowStyle: int
     {
@@ -36,7 +36,7 @@ namespace Infra
         auto CreateOpenGLContext() -> void;
         auto SwapBuffer() -> void;
         auto WindowEventProcess(uint32_t message, void* wpara, void* lpara) -> void;
-        auto SetWindowEventProcessFunction(const std::function<void(uint32_t, void*, void*)>& f) -> void;
+        auto SetWindowEventProcessFunction(const std::function<bool(void*, uint32_t, void*, void*)>& f) -> void;
         auto ClearWindowEventProcessFunction() -> void;
         auto HasEvent() -> bool;
         auto PopEvent() -> WindowEvent;
@@ -50,6 +50,7 @@ namespace Infra
         auto GetSystemHandle() -> void*;
 
         auto SetIcon(unsigned int width, unsigned int height, const std::byte* pixels) -> void;
+        auto SetIcon(int iconResId) -> void;
 
         auto SetTitle(const std::string& title) -> void;
 
@@ -89,7 +90,7 @@ namespace Infra
         std::queue<WindowEvent> _eventQueue;
 
         // Additional handler
-        std::function<void(uint32_t, void*, void*)> _winEventProcess;
+        std::function<bool(void*, uint32_t, void*, void*)> _winEventProcess;
 
         // OpenGL
         GLContextHandle _hGLContext;
