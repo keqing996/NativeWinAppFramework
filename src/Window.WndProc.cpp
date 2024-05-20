@@ -1,8 +1,5 @@
-#include "../../src/Infra/Windows/WindowsDefine.hpp"
-#include "../../src/Infra/ScopeGuard.hpp"
-#include "../../src/Infra/String.hpp"
-#include "../../src/Infra/Logger.hpp"
-#include "../../src/NativeWinApp/Window.h"
+#include "NativeWinApp/WindowsInclude.h"
+#include "NativeWinApp/Window.h"
 
 namespace NWA
 {

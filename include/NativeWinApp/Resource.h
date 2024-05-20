@@ -1,13 +1,29 @@
 #pragma once
 
-#include "Infra/ResourcePtr.hpp"
+#include <cstdint>
 
 namespace NWA
 {
-    struct DataResource;
-    struct CursorResource;
-    struct BitmapResource;
-    struct IconResource;
+    struct DataResource
+    {
+        void* pData;
+        uint32_t size;
+    };
+
+    struct CursorResource
+    {
+        void* hCursor;
+    };
+
+    struct BitmapResource
+    {
+        void* hBitmap;
+    };
+
+    struct IconResource
+    {
+        void* hIcon;
+    };
 
     class Resource
     {
@@ -16,6 +32,6 @@ namespace NWA
 
     public:
         template<typename T>
-        ResPtr<T> LoadResource(int id);
+        T LoadResource(int id);
     };
 }

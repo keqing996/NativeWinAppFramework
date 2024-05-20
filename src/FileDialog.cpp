@@ -35,7 +35,7 @@ namespace NWA
 
             ScopeGuard guardFilePath = [&] { CoTaskMemFree(filePath); };
             {
-                return String::WideStringToString(filePath);
+                return Utility::WideStringToString(filePath);
             }
         }
     }
@@ -54,7 +54,7 @@ namespace NWA
             ScopeGuard guardFileDialogRaw = [&] { pFileDialog->Release(); };
             {
                 // title
-                const auto titleMsgW = String::StringToWideString(titleMsg);
+                const auto titleMsgW = Utility::StringToWideString(titleMsg);
                 if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 
@@ -98,7 +98,7 @@ namespace NWA
             ScopeGuard guardFileDialogRaw = [&] { pFileDialog->Release(); };
             {
                 // title
-                const auto titleMsgW = String::StringToWideString(titleMsg);
+                const auto titleMsgW = Utility::StringToWideString(titleMsg);
                 if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 
@@ -123,7 +123,7 @@ namespace NWA
                 }
 
                 // save name
-                const auto defaultNameW = String::StringToWideString(defaultName);
+                const auto defaultNameW = Utility::StringToWideString(defaultName);
                 if (FAILED(pFileDialog->SetFileName(defaultNameW.c_str())))
                     return std::nullopt;
 
@@ -147,7 +147,7 @@ namespace NWA
             ScopeGuard guardFileDialogRaw = [&] { pFileDialog->Release(); };
             {
                 // title
-                const auto titleMsgW = String::StringToWideString(titleMsg);
+                const auto titleMsgW = Utility::StringToWideString(titleMsg);
                 if (FAILED(pFileDialog->SetTitle(titleMsgW.c_str())))
                     return std::nullopt;
 

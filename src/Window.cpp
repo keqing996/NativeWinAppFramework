@@ -1,10 +1,8 @@
 
-#include "../../src/Infra/Windows/WindowsDefine.hpp"
-#include "../../src/Infra/ScopeGuard.hpp"
-#include "../../src/Infra/String.hpp"
-#include "../../src/Infra/Logger.hpp"
-#include "../../src/NativeWinApp/Window.h"
-#include "../../src/NativeWinApp/Glad/Gl.h"
+#include "NativeWinApp/WindowsInclude.h"
+#include "NativeWinApp/Utility.h"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Glad/Gl.h"
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -167,7 +165,7 @@ namespace NWA
         auto [adjustWidth, adjustHeight] = Support::CalculateAdjustWindowSize(width, height, win32Style);
 
         // Create window
-        auto titleInWideStr = String::StringToWideString(title);
+        auto titleInWideStr = Utility::StringToWideString(title);
         const wchar_t* titleWide = titleInWideStr.c_str();
         _hWindow = ::CreateWindowW(
                 _sWindowRegisterName,
@@ -363,7 +361,7 @@ namespace NWA
 
     auto Window::SetTitle(const std::string& title) -> void
     {
-        auto titleInWideStr = String::StringToWideString(title);
+        auto titleInWideStr = Utility::StringToWideString(title);
         const wchar_t* titleWide = titleInWideStr.c_str();
         ::SetWindowTextW(reinterpret_cast<HWND>(_hWindow), titleWide);
     }

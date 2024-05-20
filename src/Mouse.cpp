@@ -1,6 +1,6 @@
-#include "../../src/Infra/Windows/WindowsDefine.hpp"
-#include "../../src/NativeWinApp/Window.h"
-#include "../../src/NativeWinApp/Mouse.h"
+#include "NativeWinApp/WindowsInclude.h"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Mouse.h"
 
 namespace NWA
 {

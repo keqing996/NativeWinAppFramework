@@ -1,7 +1,7 @@
 
-#include "../../src/Infra/Windows/WindowsDefine.hpp"
-#include "../../src/NativeWinApp/Window.h"
-#include "../../src/NativeWinApp/Keyboard.h"
+#include "NativeWinApp/WindowsInclude.h"
+#include "NativeWinApp/Window.h"
+#include "NativeWinApp/Keyboard.h"
 
 namespace NWA
 {
