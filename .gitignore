@@ -2,6 +2,8 @@
 .idea/
 *.pdb
 
+package/
+
 # CMake generated files
 CMakeFiles/
 CMakeCache.txt
