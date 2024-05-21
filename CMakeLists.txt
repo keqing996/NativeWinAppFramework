@@ -13,8 +13,13 @@ add_library                 (${CPP_NATIVE_WIN_APP_LIB} STATIC ${NATIVE_WIN_WINDO
 target_include_directories  (${CPP_NATIVE_WIN_APP_LIB} PUBLIC ./include/)
 
 # test proj
-add_executable          (test_window_style ./test/TestWindowStyle.cpp)
-target_link_libraries   (test_window_style PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+option (ENABLE_NWA_TEST OFF)
 
-add_executable          (test_window_opengl ./test/TestWindowOpenGL.cpp)
-target_link_libraries   (test_window_opengl PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+if (ENABLE_NWA_TEST)
+    add_executable          (test_window_style ./test/TestWindowStyle.cpp)
+    target_link_libraries   (test_window_style PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+
+    add_executable          (test_window_opengl ./test/TestWindowOpenGL.cpp)
+    target_link_libraries   (test_window_opengl PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+endif ()
+
