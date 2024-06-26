@@ -9,21 +9,8 @@ void TestNormal()
     {
         window.EventLoop();
 
-        bool shouldWindowClose = false;
-        while (window.HasEvent())
-        {
-            auto event = window.PopEvent();
-            if (event.type == NWA::WindowEvent::Type::Close)
-            {
-                shouldWindowClose = true;
-                break;
-            }
-        }
-
-        if (shouldWindowClose)
-        {
+        if (std::ranges::any_of(window.PopAllEvent(), [](const NWA::WindowEvent& event) -> bool { return event.type == NWA::WindowEvent::Type::Close; }))
             break;
-        }
     }
 }
 
@@ -35,21 +22,8 @@ void TestStyleNoResize()
     {
         window.EventLoop();
 
-        bool shouldWindowClose = false;
-        while (window.HasEvent())
-        {
-            auto event = window.PopEvent();
-            if (event.type == NWA::WindowEvent::Type::Close)
-            {
-                shouldWindowClose = true;
-                break;
-            }
-        }
-
-        if (shouldWindowClose)
-        {
+        if (std::ranges::any_of(window.PopAllEvent(), [](const NWA::WindowEvent& event) -> bool { return event.type == NWA::WindowEvent::Type::Close; }))
             break;
-        }
     }
 }
 

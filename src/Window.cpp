@@ -412,18 +412,32 @@ namespace NWA
         }
     }
 
-    auto Window::HasEvent() -> bool
+    auto Window::HasEvent() const -> bool
     {
         return !_eventQueue.empty();
     }
 
-    auto Window::PopEvent() -> WindowEvent
+    auto Window::PopEvent(WindowEvent& outEvent) -> bool
     {
-        if (_eventQueue.empty())
-            return WindowEvent(WindowEvent::Type::None);
+        if (!HasEvent())
+            return false;
 
-        WindowEvent result = _eventQueue.front();
+        outEvent = _eventQueue.front();
         _eventQueue.pop();
+
+        return true;
+    }
+
+    auto Window::PopAllEvent() -> std::vector<WindowEvent>
+    {
+        std::vector<WindowEvent> result;
+        result.reserve(_eventQueue.size());
+
+        while (!_eventQueue.empty())
+        {
+            result.push_back(_eventQueue.front());
+            _eventQueue.pop();
+        }
 
         return result;
     }

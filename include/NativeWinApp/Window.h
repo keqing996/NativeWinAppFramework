@@ -41,8 +41,9 @@ namespace NWA
         auto WindowEventProcess(uint32_t message, void* wpara, void* lpara) -> void;
         auto SetWindowEventProcessFunction(const std::function<bool(void*, uint32_t, void*, void*)>& f) -> void;
         auto ClearWindowEventProcessFunction() -> void;
-        auto HasEvent() -> bool;
-        auto PopEvent() -> WindowEvent;
+        auto HasEvent() const -> bool;
+        auto PopEvent(WindowEvent& outEvent) -> bool;
+        auto PopAllEvent() -> std::vector<WindowEvent>;
 
         auto GetSize() -> std::pair<int, int>;
         auto SetSize(int width, int height) -> void;
