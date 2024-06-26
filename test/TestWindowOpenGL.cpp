@@ -2,7 +2,7 @@
 #include <array>
 #include <format>
 #include "NativeWinApp/Window.h"
-#include "NativeWinApp/Glad/Gl.h"
+#include "glad/gl.h"
 
 const char* vertexShaderSource ="#version 330 core\n"
                                 "layout (location = 0) in vec3 aPos;\n"

@@ -2,7 +2,6 @@
 #include "NativeWinApp/WindowsInclude.h"
 #include "NativeWinApp/Utility.h"
 #include "NativeWinApp/Window.h"
-#include "NativeWinApp/Glad/Gl.h"
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -476,8 +475,6 @@ namespace NWA
     auto Window::CreateOpenGLContext() -> void
     {
         HDC hDeviceHandle = static_cast<HDC>(_hDeviceHandle);
-
-        ::gladLoaderLoadGL();
 
         PIXELFORMATDESCRIPTOR pfd =
         {

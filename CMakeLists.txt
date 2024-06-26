@@ -19,7 +19,7 @@ if (ENABLE_NWA_TEST)
     add_executable          (test_window_style ./test/TestWindowStyle.cpp)
     target_link_libraries   (test_window_style PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
 
-    add_executable          (test_window_opengl ./test/TestWindowOpenGL.cpp)
+    add_executable          (test_window_opengl ./test/TestWindowOpenGL.cpp test/glad/gl.cpp)
     target_link_libraries   (test_window_opengl PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
 endif ()
 
