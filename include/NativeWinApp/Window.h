@@ -15,8 +15,11 @@ namespace NWA
         HaveTitleBar = 1 << 0,
         HaveResize = 1 << 1,
         HaveClose = 1 << 2,
-        Default = HaveTitleBar | HaveResize | HaveClose
     };
+
+    inline int WindowStyleDefault = static_cast<int>(WindowStyle::HaveTitleBar) | static_cast<int>(WindowStyle::HaveResize) | static_cast<int>(WindowStyle::HaveClose);
+    inline int WindowStyleNoResize = static_cast<int>(WindowStyle::HaveTitleBar) | static_cast<int>(WindowStyle::HaveClose);
+    inline int WindowStyleNoClose = static_cast<int>(WindowStyle::HaveTitleBar) | static_cast<int>(WindowStyle::HaveResize);
 
     class Window
     {
@@ -28,7 +31,7 @@ namespace NWA
         using GLContextHandle = void*;
 
     public:
-        Window(int width, int height, const std::string& title, int style = (int)WindowStyle::Default);
+        Window(int width, int height, const std::string& title, int style = WindowStyleDefault);
         ~Window();
 
     public:
