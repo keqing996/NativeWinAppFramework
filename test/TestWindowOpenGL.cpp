@@ -30,7 +30,7 @@ const std::array<float, 18> vertices = {
 
 int main()
 {
-    Infra::Window window(800, 600, "TestOpengl");
+    NWA::Window window(800, 600, "TestOpengl");
     window.CreateOpenGLContext();
 
     ::gladLoaderLoadGL();
@@ -70,28 +70,10 @@ int main()
 
     while (true)
     {
-
-#pragma region [Window Loop]
-
         window.EventLoop();
 
-        bool shouldWindowClose = false;
-        while (window.HasEvent())
-        {
-            auto event = window.PopEvent();
-            if (event.type == Infra::WindowEvent::Type::Close)
-            {
-                shouldWindowClose = true;
-                break;
-            }
-        }
-
-        if (shouldWindowClose)
+        if (std::ranges::any_of(window.PopAllEvent(), [](const NWA::WindowEvent& event) -> bool { return event.type == NWA::WindowEvent::Type::Close; }))
             break;
-
-#pragma endregion
-
-#pragma region [Render Loop]
 
         ::glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
         ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -100,8 +82,6 @@ int main()
         ::glUseProgram(shaderProgram);
         ::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
         ::glDrawArrays(GL_TRIANGLES, 0, 3);
-
-#pragma endregion
 
         window.SwapBuffer();
     }
