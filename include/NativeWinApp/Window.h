@@ -37,7 +37,7 @@ namespace NWA
     public:
         auto EventLoop() -> void;
         auto CreateOpenGLContext() -> void;
-        auto SwapBuffer() -> void;
+        auto SwapBuffer() const -> void;
         auto WindowEventProcess(uint32_t message, void* wpara, void* lpara) -> void;
         auto SetWindowEventProcessFunction(const std::function<bool(void*, uint32_t, void*, void*)>& f) -> void;
         auto ClearWindowEventProcessFunction() -> void;
@@ -45,13 +45,13 @@ namespace NWA
         auto PopEvent(WindowEvent& outEvent) -> bool;
         auto PopAllEvent() -> std::vector<WindowEvent>;
 
-        auto GetSize() -> std::pair<int, int>;
+        auto GetSize() const -> std::pair<int, int>;
         auto SetSize(int width, int height) -> void;
 
-        auto GetPosition() -> std::pair<int, int>;
+        auto GetPosition() const -> std::pair<int, int>;
         auto SetPosition(int x, int y) -> void;
 
-        auto GetSystemHandle() -> void*;
+        auto GetSystemHandle() const -> void*;
 
         auto SetIcon(unsigned int width, unsigned int height, const std::byte* pixels) -> void;
         auto SetIcon(int iconResId) -> void;
@@ -60,13 +60,13 @@ namespace NWA
 
         auto SetWindowVisible(bool show) -> void;
 
-        auto GetCursorVisible() -> bool;
+        auto GetCursorVisible() const -> bool;
         auto SetCursorVisible(bool show) -> void;
 
-        auto GetCursorCapture() -> bool;
+        auto GetCursorCapture() const -> bool;
         auto SetCursorCapture(bool capture) -> void;
 
-        auto GetKeyRepeated() -> bool;
+        auto GetKeyRepeated() const -> bool;
         auto SetKeyRepeated(bool repeated) -> void;
 
     private:

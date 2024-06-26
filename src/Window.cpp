@@ -143,29 +143,29 @@ namespace NWA
 
         // Get create style
         DWORD win32Style = WS_VISIBLE;
-        if (style == (int)WindowStyle::None)
+        if (style == static_cast<int>(WindowStyle::None))
             win32Style |= WS_POPUP;
         else
         {
-            if (style & (int)WindowStyle::HaveTitleBar)
+            if (style & static_cast<int>(WindowStyle::HaveTitleBar))
                 win32Style |= WS_CAPTION | WS_MINIMIZEBOX;
-            if (style & (int)WindowStyle::HaveResize)
+            if (style & static_cast<int>(WindowStyle::HaveResize))
                 win32Style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
-            if (style & (int)WindowStyle::HaveClose)
+            if (style & static_cast<int>(WindowStyle::HaveClose))
                 win32Style |= WS_SYSMENU;
         }
 
         // Calculate create position: left & top
-        HDC screenDC = ::GetDC(nullptr);
-        int left = (::GetDeviceCaps(screenDC, HORZRES) - width) / 2;
-        int top = (::GetDeviceCaps(screenDC, VERTRES) - height) / 2;
+        const HDC screenDC = ::GetDC(nullptr);
+        const int left = (::GetDeviceCaps(screenDC, HORZRES) - width) / 2;
+        const int top = (::GetDeviceCaps(screenDC, VERTRES) - height) / 2;
         ::ReleaseDC(nullptr, screenDC);
 
         // Adjust create size
         auto [adjustWidth, adjustHeight] = Support::CalculateAdjustWindowSize(width, height, win32Style);
 
         // Create window
-        auto titleInWideStr = Utility::StringToWideString(title);
+        const auto titleInWideStr = Utility::StringToWideString(title);
         const wchar_t* titleWide = titleInWideStr.c_str();
         _hWindow = ::CreateWindowW(
                 _sWindowRegisterName,
@@ -184,7 +184,7 @@ namespace NWA
             return;
 
         // Get device context
-        _hDeviceHandle = ::GetDC(reinterpret_cast<HWND>(_hWindow));
+        _hDeviceHandle = ::GetDC(static_cast<HWND>(_hWindow));
 
         // Global counting
         _sGlobalWindowsCount++;
@@ -201,19 +201,19 @@ namespace NWA
         // Release openGL
         if (_hGLContext)
         {
-            ::wglMakeCurrent(reinterpret_cast<HDC>(_hDeviceHandle), nullptr);
-            ::wglDeleteContext(reinterpret_cast<HGLRC>(_hGLContext));
+            ::wglMakeCurrent(static_cast<HDC>(_hDeviceHandle), nullptr);
+            ::wglDeleteContext(static_cast<HGLRC>(_hGLContext));
         }
 
         if (_hDeviceHandle)
-            ::ReleaseDC(reinterpret_cast<HWND>(_hWindow), reinterpret_cast<HDC>(_hDeviceHandle));
+            ::ReleaseDC(static_cast<HWND>(_hWindow), static_cast<HDC>(_hDeviceHandle));
 
         // Icon
         if (_hIcon != nullptr)
-            ::DestroyIcon(reinterpret_cast<HICON>(_hIcon));
+            ::DestroyIcon(static_cast<HICON>(_hIcon));
 
         // Destroy window
-        ::DestroyWindow(reinterpret_cast<HWND>(_hWindow));
+        ::DestroyWindow(static_cast<HWND>(_hWindow));
 
         // Global counting
         _sGlobalWindowsCount--;
@@ -245,13 +245,13 @@ namespace NWA
 
     void Window::SetSize(int width, int height)
     {
-        HWND hWnd = reinterpret_cast<HWND>(_hWindow);
-        DWORD dwStyle = static_cast<DWORD>(::GetWindowLongPtrW(hWnd, GWL_STYLE));
+        const HWND hWnd = static_cast<HWND>(_hWindow);
+        const DWORD dwStyle = static_cast<DWORD>(::GetWindowLongPtrW(hWnd, GWL_STYLE));
         auto [adjustWidth, adjustHeight] = Support::CalculateAdjustWindowSize(width, height, dwStyle);
         ::SetWindowPos(hWnd, nullptr, 0, 0, adjustWidth, adjustHeight, SWP_NOMOVE | SWP_NOZORDER);
     }
 
-    auto Window::GetSystemHandle() -> void*
+    auto Window::GetSystemHandle() const -> void*
     {
         return _hWindow;
     }
@@ -259,7 +259,7 @@ namespace NWA
     auto Window::SetIcon(unsigned int width, unsigned int height, const std::byte* pixels) -> void
     {
         if (_hIcon != nullptr)
-            ::DestroyIcon(reinterpret_cast<HICON>(_hIcon));
+            ::DestroyIcon(static_cast<HICON>(_hIcon));
 
         _hIcon = nullptr;
 
@@ -280,18 +280,18 @@ namespace NWA
                 1,
                 32,
                 nullptr,
-                (unsigned char*)iconPixels.data());
+                reinterpret_cast<unsigned char*>(iconPixels.data()));
 
         if (_hIcon != nullptr)
         {
             ::SendMessageW(
-                    reinterpret_cast<HWND>(_hWindow),
+                    static_cast<HWND>(_hWindow),
                     WM_SETICON,
                     ICON_BIG,
                     reinterpret_cast<LPARAM>(_hIcon));
 
             ::SendMessageW(
-                    reinterpret_cast<HWND>(_hWindow),
+                    static_cast<HWND>(_hWindow),
                     WM_SETICON,
                     ICON_SMALL,
                     reinterpret_cast<LPARAM>(_hIcon));
@@ -301,7 +301,7 @@ namespace NWA
     auto Window::SetIcon(int iconResId) -> void
     {
         if (_hIcon != nullptr)
-            ::DestroyIcon(reinterpret_cast<HICON>(_hIcon));
+            ::DestroyIcon(static_cast<HICON>(_hIcon));
 
         _hIcon = nullptr;
 
@@ -309,13 +309,13 @@ namespace NWA
         if (_hIcon != nullptr)
         {
             ::SendMessageW(
-                    reinterpret_cast<HWND>(_hWindow),
+                    static_cast<HWND>(_hWindow),
                     WM_SETICON,
                     ICON_BIG,
                     reinterpret_cast<LPARAM>(_hIcon));
 
             ::SendMessageW(
-                    reinterpret_cast<HWND>(_hWindow),
+                    static_cast<HWND>(_hWindow),
                     WM_SETICON,
                     ICON_SMALL,
                     reinterpret_cast<LPARAM>(_hIcon));
@@ -324,13 +324,13 @@ namespace NWA
 
     auto Window::SetWindowVisible(bool show) -> void
     {
-        ::ShowWindow(reinterpret_cast<HWND>(_hWindow), show ? SW_SHOW : SW_HIDE);
+        ::ShowWindow(static_cast<HWND>(_hWindow), show ? SW_SHOW : SW_HIDE);
     }
 
     auto Window::SetCursorVisible(bool show) -> void
     {
         _cursorVisible = show;
-        ::SetCursor(_cursorVisible ? reinterpret_cast<HCURSOR>(_hCursor) : nullptr);
+        ::SetCursor(_cursorVisible ? static_cast<HCURSOR>(_hCursor) : nullptr);
     }
 
     auto Window::SetCursorCapture(bool capture) -> void
@@ -339,17 +339,17 @@ namespace NWA
         CaptureCursorInternal(_cursorCapture);
     }
 
-    auto Window::GetCursorVisible() -> bool
+    auto Window::GetCursorVisible() const -> bool
     {
         return _cursorVisible;
     }
 
-    auto Window::GetCursorCapture() -> bool
+    auto Window::GetCursorCapture() const -> bool
     {
         return _cursorCapture;
     }
 
-    auto Window::GetKeyRepeated() -> bool
+    auto Window::GetKeyRepeated() const -> bool
     {
         return _enableKeyRepeat;
     }
@@ -363,20 +363,20 @@ namespace NWA
     {
         auto titleInWideStr = Utility::StringToWideString(title);
         const wchar_t* titleWide = titleInWideStr.c_str();
-        ::SetWindowTextW(reinterpret_cast<HWND>(_hWindow), titleWide);
+        ::SetWindowTextW(static_cast<HWND>(_hWindow), titleWide);
     }
 
-    auto Window::GetSize() -> std::pair<int, int>
+    auto Window::GetSize() const -> std::pair<int, int>
     {
         RECT rect;
-        ::GetClientRect(reinterpret_cast<HWND>(_hWindow), &rect);
+        ::GetClientRect(static_cast<HWND>(_hWindow), &rect);
         return { static_cast<int>(rect.right - rect.left), static_cast<int>(rect.bottom - rect.top) };
     }
 
-    auto Window::GetPosition() -> std::pair<int, int>
+    auto Window::GetPosition() const -> std::pair<int, int>
     {
         RECT rect;
-        ::GetWindowRect(reinterpret_cast<HWND>(_hWindow), &rect);
+        ::GetWindowRect(static_cast<HWND>(_hWindow), &rect);
 
         return { static_cast<int>(rect.left), static_cast<int>(rect.top) };
     }
@@ -384,8 +384,8 @@ namespace NWA
     auto Window::SetPosition(int x, int y) -> void
     {
         ::SetWindowPos(
-                reinterpret_cast<HWND>(_hWindow),
-                NULL,
+                static_cast<HWND>(_hWindow),
+                nullptr,
                 x,
                 y,
                 0,
@@ -452,8 +452,8 @@ namespace NWA
         if (doCapture)
         {
             RECT rect;
-            ::GetClientRect(reinterpret_cast<HWND>(_hWindow), &rect);
-            ::MapWindowPoints(reinterpret_cast<HWND>(_hWindow), nullptr, reinterpret_cast<LPPOINT>(&rect), 2);
+            ::GetClientRect(static_cast<HWND>(_hWindow), &rect);
+            ::MapWindowPoints(static_cast<HWND>(_hWindow), nullptr, reinterpret_cast<LPPOINT>(&rect), 2);
             ::ClipCursor(&rect);
         }
         else
@@ -475,41 +475,40 @@ namespace NWA
     // https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
     auto Window::CreateOpenGLContext() -> void
     {
-        HDC hDeviceHandle = reinterpret_cast<HDC>(_hDeviceHandle);
+        HDC hDeviceHandle = static_cast<HDC>(_hDeviceHandle);
 
         ::gladLoaderLoadGL();
 
         PIXELFORMATDESCRIPTOR pfd =
         {
-                sizeof(PIXELFORMATDESCRIPTOR),
-                1,
-                PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
-                PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
-                32,                   // Color depth of the framebuffer.
-                0, 0, 0, 0, 0, 0,
-                0,
-                0,
-                0,
-                0, 0, 0, 0,
-                24,                   // Number of bits for the depth buffer
-                8,                    // Number of bits for the stencil buffer
-                0,                    // Number of Aux buffers in the framebuffer.
-                PFD_MAIN_PLANE,
-                0,
-                0, 0, 0
+            sizeof(PIXELFORMATDESCRIPTOR),
+            1,
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
+            PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
+            32,                   // Color depth of the framebuffer.
+            0, 0, 0, 0, 0, 0,
+            0,
+            0,
+            0,
+            0, 0, 0, 0,
+            24,                   // Number of bits for the depth buffer
+            8,                    // Number of bits for the stencil buffer
+            0,                    // Number of Aux buffers in the framebuffer.
+            PFD_MAIN_PLANE,
+            0,
+            0, 0, 0
         };
 
-        int letWindowsChooseThisPixelFormat;
-        letWindowsChooseThisPixelFormat = ::ChoosePixelFormat(hDeviceHandle, &pfd);
+        const int letWindowsChooseThisPixelFormat = ::ChoosePixelFormat(hDeviceHandle, &pfd);
         ::SetPixelFormat(hDeviceHandle, letWindowsChooseThisPixelFormat, &pfd);
 
         _hGLContext = ::wglCreateContext(hDeviceHandle);
-        ::wglMakeCurrent(hDeviceHandle, reinterpret_cast<HGLRC>(_hGLContext));
+        ::wglMakeCurrent(hDeviceHandle, static_cast<HGLRC>(_hGLContext));
     }
 
-    auto Window::SwapBuffer() -> void
+    auto Window::SwapBuffer() const -> void
     {
-        ::SwapBuffers(reinterpret_cast<HDC>(_hDeviceHandle));
+        ::SwapBuffers(static_cast<HDC>(_hDeviceHandle));
     }
 
 }

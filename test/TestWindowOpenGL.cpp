@@ -51,9 +51,6 @@ int main()
     ::glAttachShader(shaderProgram, fragmentShader);
     ::glLinkProgram(shaderProgram);
 
-    ::glDeleteShader(vertexShader);
-    ::glDeleteShader(fragmentShader);
-
     unsigned int vertexArray;
     ::glGenVertexArrays(1, &vertexArray);
     ::glBindVertexArray(vertexArray);
@@ -86,6 +83,8 @@ int main()
         window.SwapBuffer();
     }
 
+    ::glDeleteShader(vertexShader);
+    ::glDeleteShader(fragmentShader);
     ::glDeleteVertexArrays(1, &vertexArray);
     ::glDeleteBuffers(1, &vertexBuffer);
     ::glDeleteProgram(shaderProgram);
