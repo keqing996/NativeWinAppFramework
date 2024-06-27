@@ -15,11 +15,15 @@ target_include_directories  (${CPP_NATIVE_WIN_APP_LIB} PUBLIC ./include/)
 # test proj
 option (ENABLE_NWA_TEST OFF)
 
-if (ENABLE_NWA_TEST)
-    add_executable          (test_window_style ./test/TestWindowStyle.cpp)
-    target_link_libraries   (test_window_style PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+function(AddTest name)
+    file (GLOB_RECURSE TEST_SRC ./test/${name}/*.cpp)
+    add_executable          (${name} ${TEST_SRC})
+    target_link_libraries   (${name} PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+endfunction()
 
-    add_executable          (test_window_opengl ./test/TestWindowOpenGL.cpp test/glad/gl.cpp)
-    target_link_libraries   (test_window_opengl PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+if (ENABLE_NWA_TEST)
+    AddTest(TestWindowStyle)
+    AddTest(TestWindowOpenGL)
+    AddTest(TestWindowVulkan)
 endif ()
 
