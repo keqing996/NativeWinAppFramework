@@ -3,22 +3,25 @@
 #include <vector>
 #include "NativeWinApp/Window.h"
 
+bool CheckLayerSupport(const std::string& layerName);
+
 int main()
 {
     int windowWidth = 800;
     int windowHeight = 800;
 
-#pragma region [Create window]
-
     NWA::Window window(windowWidth, windowHeight, "TestVulkan");
-
-#pragma endregion
 
 #pragma region [Create vulkan instance]
 
+    static const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+    // CREATE VULKAN INSTANCE
+    // The instance is the connection between application and the Vulkan library
+    // and creating it involves specifying some details about your application to the driver.
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Vulkan Triangle Example";
+    appInfo.pApplicationName = "TestVulkan";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -29,7 +32,7 @@ int main()
     createInfo.pApplicationInfo = &appInfo;
 
     VkInstance vkInstance;
-    if (vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS)
+    if (::vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS)
         throw std::runtime_error("Failed to create Vulkan instance!");
 
 #pragma endregion
@@ -210,4 +213,29 @@ int main()
 
     return 0;
 
+}
+
+bool CheckLayerSupport(const std::string& layerName)
+{
+    static bool layerPropertiesInit = false;
+    static uint32_t layerCount = 0;
+    static std::vector<VkLayerProperties> availableLayers;
+
+    if (!layerPropertiesInit)
+    {
+        ::vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        availableLayers.resize(layerCount);
+        ::vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        layerPropertiesInit = true;
+    }
+
+    for (const auto& layerProperties : availableLayers)
+    {
+        if (::strcmp(layerName.c_str(), layerProperties.layerName) == 0)
+            return true;
+    }
+
+    return false;
 }
