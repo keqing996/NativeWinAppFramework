@@ -15,15 +15,19 @@ target_include_directories  (${CPP_NATIVE_WIN_APP_LIB} PUBLIC ./include/)
 # test proj
 option (ENABLE_NWA_TEST OFF)
 
-function(AddTest name)
-    file (GLOB_RECURSE TEST_SRC ./test/${name}/*.cpp)
-    add_executable          (${name} ${TEST_SRC})
-    target_link_libraries   (${name} PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
-endfunction()
-
 if (ENABLE_NWA_TEST)
-    AddTest(TestWindowStyle)
-    AddTest(TestWindowOpenGL)
-    AddTest(TestWindowVulkan)
+    # style test
+    add_executable          (TestWindowStyle ./test/TestWindowStyle/Main.cpp)
+    target_link_libraries   (TestWindowStyle PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+
+    # openGL support test
+    add_executable          (TestWindowOpenGL ./test/TestWindowOpenGL/Main.cpp ./test/TestWindowOpenGL/glad/gl.cpp)
+    target_link_libraries   (TestWindowOpenGL PRIVATE ${CPP_NATIVE_WIN_APP_LIB})
+
+    # vulkan support test
+    find_package                (Vulkan REQUIRED)
+    add_executable              (TestWindowVulkan ./test/TestWindowVulkan/Main.cpp)
+    target_include_directories  (TestWindowVulkan PRIVATE ${Vulkan_INCLUDE_DIRS})
+    target_link_libraries       (TestWindowVulkan PRIVATE Vulkan::Vulkan ${CPP_NATIVE_WIN_APP_LIB})
 endif ()
 
