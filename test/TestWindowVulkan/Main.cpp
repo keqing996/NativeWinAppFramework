@@ -3,6 +3,8 @@
 #include <vector>
 #include "NativeWinApp/Window.h"
 
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugReportFlagsEXT, VkDebugReportObjectTypeEXT, uint64_t, size_t, int32_t, const char*, const char*, void*);
+
 int main()
 {
     int windowWidth = 800;
@@ -44,7 +46,7 @@ int main()
 
 #pragma endregion
 
-#pragma region [Vulkan Instance]
+#pragma region [Vulkan instance]
 
     VkInstance vkInstance;
 
@@ -72,6 +74,22 @@ int main()
 
 #pragma endregion
 
+#pragma region [Debug messager]
+
+    VkDebugReportCallbackEXT vkDebugReportExtHandle;
+
+    {
+        VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo = VkDebugReportCallbackCreateInfoEXT();
+        debugReportCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+        debugReportCallbackCreateInfo.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
+        debugReportCallbackCreateInfo.pfnCallback = DebugCallback;
+
+        if (::vkCreateDebugReportCallbackEXT(vkInstance, &debugReportCallbackCreateInfo, nullptr, &vkDebugReportExtHandle) != VK_SUCCESS)
+            throw std::runtime_error("failed to create debug info!");
+    }
+
+#pragma endregion
+
     // Main loop
     while (true)
     {
@@ -84,4 +102,11 @@ int main()
 
     return 0;
 
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugReportFlagsEXT, VkDebugReportObjectTypeEXT, uint64_t, size_t, int32_t, const char*, const char* pMessage, void*)
+{
+    std::cout << pMessage << std::endl;
+
+    return VK_FALSE;
 }
