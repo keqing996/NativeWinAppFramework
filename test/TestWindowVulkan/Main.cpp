@@ -17,19 +17,14 @@ int main()
 
 #pragma region [Setup layers & extensions]
 
-    std::vector<VkLayerProperties> supportedLayers;
     std::vector<const char*> validationLayers;
 
     {
         // Get all layers
         uint32_t vkLayerPropertiesCount = 0;
-        if (::vkEnumerateInstanceLayerProperties(&vkLayerPropertiesCount, nullptr) != VK_SUCCESS)
-            throw std::runtime_error("failed to enumerate layer properties!");
-
-        supportedLayers.resize(vkLayerPropertiesCount);
-
-        if (::vkEnumerateInstanceLayerProperties(&vkLayerPropertiesCount, &supportedLayers[0]) != VK_SUCCESS)
-            throw std::runtime_error("failed to enumerate layer properties!");
+        ::vkEnumerateInstanceLayerProperties(&vkLayerPropertiesCount, nullptr);
+        std::vector<VkLayerProperties> supportedLayers(vkLayerPropertiesCount);
+        ::vkEnumerateInstanceLayerProperties(&vkLayerPropertiesCount, supportedLayers.data());
 
         // Add validation layers
         const char* VALIDATION_LAYER_NAME = "VK_LAYER_KHRONOS_validation";
@@ -73,7 +68,7 @@ int main()
 
 #pragma endregion
 
-#pragma region [Debug messager]
+#pragma region [Debug message]
 
     VkDebugUtilsMessengerEXT vkDebugUtilExtHandle;
 
@@ -86,6 +81,47 @@ int main()
 
         if (CreateDebugUtilsMessengerEXT(vkInstance, &createInfo, nullptr, &vkDebugUtilExtHandle) != VK_SUCCESS)
             throw std::runtime_error("failed to set up debug messenger!");
+    }
+
+#pragma endregion
+
+#pragma region [Physical device]
+
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+    {
+        uint32_t deviceCount = 0;
+        ::vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+        std::vector<VkPhysicalDevice> devices(deviceCount);
+        ::vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
+
+        for (const auto& device : devices)
+        {
+            // Check device suitable
+            uint32_t queueFamilyCount = 0;
+            ::vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+            std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+            ::vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+            bool suitable = false;
+            for (auto i = 0; i < queueFamilies.size(); i++)
+            {
+                if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                {
+                    suitable = true;
+                    break;
+                }
+            }
+
+            if (suitable)
+            {
+                physicalDevice = device;
+                break;
+            }
+        }
+
+        if (physicalDevice == VK_NULL_HANDLE)
+            throw std::runtime_error("failed to find a suitable GPU!");
     }
 
 #pragma endregion
