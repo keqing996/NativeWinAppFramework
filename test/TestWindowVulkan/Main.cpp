@@ -35,8 +35,8 @@ int main()
         }
     }
 
-    std::vector<const char*> enableExtensions = NWA::Window::Vulkan::GetRequiredInstanceExtensions();
-    enableExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    std::vector<const char*> platformExtension = NWA::Window::Vulkan::GetRequiredInstanceExtensions();
+    platformExtension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
 #pragma endregion
 
@@ -58,8 +58,8 @@ int main()
         createInfo.pApplicationInfo = &appInfo;
         createInfo.enabledLayerCount = validationLayers.size();
         createInfo.ppEnabledLayerNames = validationLayers.data();
-        createInfo.enabledExtensionCount = enableExtensions.size();
-        createInfo.ppEnabledExtensionNames = enableExtensions.data();
+        createInfo.enabledExtensionCount = platformExtension.size();
+        createInfo.ppEnabledExtensionNames = platformExtension.data();
 
         auto createInstanceRet = ::vkCreateInstance(&createInfo, nullptr, &vkInstance);
         if (createInstanceRet != VK_SUCCESS)
@@ -127,9 +127,93 @@ int main()
                 break;
             }
         }
+    }
 
-        if (physicalDevice == VK_NULL_HANDLE)
-            throw std::runtime_error("failed to find a suitable GPU!");
+    if (physicalDevice == VK_NULL_HANDLE)
+        throw std::runtime_error("failed to find a suitable GPU!");
+
+    VkFormat depthFormat;
+
+    {
+        VkFormatProperties formatProperties {};
+        ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D24_UNORM_S8_UINT, &formatProperties);
+        if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+            depthFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+        else
+        {
+            ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT_S8_UINT, &formatProperties);
+
+            if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+                depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+            else
+            {
+                ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT, &formatProperties);
+
+                if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+                    depthFormat = VK_FORMAT_D32_SFLOAT;
+                else
+                    throw std::runtime_error("failed to find a suitable depth format!");
+            }
+        }
+    }
+
+#pragma endregion
+
+#pragma region [Logic device]
+
+    VkDevice logicDevice;
+    VkQueue deviceQueue;
+    int queueFamilyIndex = -1;
+    VkSurfaceKHR surface;
+    const char* deviceExtensions[1] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+    {
+        uint32_t queueFamilyCount = 0;
+        ::vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+        std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyCount);
+        ::vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
+
+        for (std::size_t i = 0; i < queueFamilyProperties.size(); i++)
+        {
+            VkBool32 surfaceSupported = VK_FALSE;
+
+            ::vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &surfaceSupported);
+
+            if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (surfaceSupported == VK_TRUE))
+            {
+                queueFamilyIndex = static_cast<int>(i);
+                break;
+            }
+        }
+
+        if (queueFamilyIndex < 0)
+            throw std::runtime_error("failed to queue families!");
+
+        float queuePriority = 1.0f;
+
+        VkDeviceQueueCreateInfo deviceQueueCreateInfo = VkDeviceQueueCreateInfo();
+        deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        deviceQueueCreateInfo.queueCount = 1;
+        deviceQueueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(queueFamilyIndex);
+        deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+        VkPhysicalDeviceFeatures physicalDeviceFeatures = VkPhysicalDeviceFeatures();
+        physicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
+
+        VkDeviceCreateInfo deviceCreateInfo = VkDeviceCreateInfo();
+        deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        deviceCreateInfo.enabledExtensionCount = 1;
+        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
+        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+        deviceCreateInfo.queueCreateInfoCount = 1;
+        deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+        deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
+
+        if (::vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicDevice) != VK_SUCCESS)
+            throw std::runtime_error("failed to create logic device!");
+
+        ::vkGetDeviceQueue(logicDevice, static_cast<uint32_t>(queueFamilyIndex), 0, &deviceQueue);
     }
 
 #pragma endregion
