@@ -97,23 +97,31 @@ int main()
 
         for (const auto& device : devices)
         {
-            // Check device suitable
-            uint32_t queueFamilyCount = 0;
-            ::vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-            std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-            ::vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+            VkPhysicalDeviceProperties deviceProperties;
+            ::vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-            bool suitable = false;
-            for (auto i = 0; i < queueFamilies.size(); i++)
+            uint32_t extensionCount = 0;
+            ::vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+            std::vector<VkExtensionProperties> extensions(extensionCount);
+            ::vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, extensions.data());
+
+            bool supportsSwapchain = false;
+            for (auto& extension: extensions)
             {
-                if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                if (std::strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
                 {
-                    suitable = true;
+                    supportsSwapchain = true;
                     break;
                 }
             }
 
-            if (suitable)
+            if (!supportsSwapchain)
+                continue;
+
+            if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+                physicalDevice = device;
+
+            if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
             {
                 physicalDevice = device;
                 break;
