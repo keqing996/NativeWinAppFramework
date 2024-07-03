@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "NativeWinApp/Window.h"
+#include "NativeWinApp/Vulkan.h"
 
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
 
@@ -37,7 +38,7 @@ int main()
         }
 
         // Instance level extension
-        auto windowRequiredExtensions = NWA::Window::Vulkan::GetRequiredInstanceExtensions();
+        auto windowRequiredExtensions = NWA::Vulkan::GetRequiredInstanceExtensions();
         instanceLevelExtension.insert(instanceLevelExtension.end(), windowRequiredExtensions.begin(), windowRequiredExtensions.end());
         instanceLevelExtension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
@@ -89,6 +90,14 @@ int main()
         if (CreateDebugUtilsMessengerEXT(vkInstance, &createInfo, nullptr, &vkDebugUtilExtHandle) != VK_SUCCESS)
             throw std::runtime_error("failed to set up debug messenger!");
     }
+
+#pragma endregion
+
+#pragma region [Window surface]
+
+    VkSurfaceKHR vkSurface;
+    if (!NWA::Vulkan::CreateVulkanSurface(vkInstance, window, vkSurface, nullptr))
+        throw std::runtime_error("failed to create window surface!");
 
 #pragma endregion
 
@@ -170,8 +179,6 @@ int main()
 
     VkDevice logicDevice;
     VkQueue deviceQueue;
-    int queueFamilyIndex = -1;
-    VkSurfaceKHR surface;
 
     {
         uint32_t queueFamilyCount = 0;
@@ -179,13 +186,22 @@ int main()
         std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyCount);
         ::vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
 
+        int queueFamilyIndex = -1;
         for (std::size_t i = 0; i < queueFamilyProperties.size(); i++)
         {
-            VkBool32 surfaceSupported = VK_FALSE;
+            // Support graphics
+            bool supportGraphics = queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT;
 
-            ::vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &surfaceSupported);
+            // Support compute
+            bool supportCompute = queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT;
 
-            if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (surfaceSupported == VK_TRUE))
+            // Support surface
+            VkBool32 supportPresentation = false;
+            ::vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, vkSurface, &supportPresentation);
+
+            // By vulkan spec, we can not assum that there will be one queue statisfy "graphics", "compute"
+            // and "Presentation" at the same time. But we just make this assumption, it's fine.
+            if (supportGraphics && supportCompute && supportPresentation)
             {
                 queueFamilyIndex = static_cast<int>(i);
                 break;
@@ -197,16 +213,16 @@ int main()
 
         float queuePriority = 1.0f;
 
-        VkDeviceQueueCreateInfo deviceQueueCreateInfo = VkDeviceQueueCreateInfo();
+        VkDeviceQueueCreateInfo deviceQueueCreateInfo {};
         deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         deviceQueueCreateInfo.queueCount = 1;
         deviceQueueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(queueFamilyIndex);
         deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
 
-        VkPhysicalDeviceFeatures physicalDeviceFeatures = VkPhysicalDeviceFeatures();
+        VkPhysicalDeviceFeatures physicalDeviceFeatures {};
         physicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
 
-        VkDeviceCreateInfo deviceCreateInfo = VkDeviceCreateInfo();
+        VkDeviceCreateInfo deviceCreateInfo {};
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceCreateInfo.enabledExtensionCount = deviceLevelExtension.size();
         deviceCreateInfo.ppEnabledExtensionNames = deviceLevelExtension.data();
