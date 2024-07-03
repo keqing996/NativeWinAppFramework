@@ -17,7 +17,9 @@ int main()
 
 #pragma region [Setup layers & extensions]
 
-    std::vector<const char*> validationLayers;
+    std::vector<const char*> activeLayers;
+    std::vector<const char*> instanceLevelExtension;
+    std::vector<const char*> deviceLevelExtension;
 
     {
         // Get all layers
@@ -31,12 +33,17 @@ int main()
         for (std::size_t i = 0; i < supportedLayers.size(); i++)
         {
             if (std::strcmp(supportedLayers[i].layerName, VALIDATION_LAYER_NAME) == 0)
-                validationLayers.push_back(VALIDATION_LAYER_NAME);
+                activeLayers.push_back(VALIDATION_LAYER_NAME);
         }
-    }
 
-    std::vector<const char*> platformExtension = NWA::Window::Vulkan::GetRequiredInstanceExtensions();
-    platformExtension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        // Instance level extension
+        auto windowRequiredExtensions = NWA::Window::Vulkan::GetRequiredInstanceExtensions();
+        instanceLevelExtension.insert(instanceLevelExtension.end(), windowRequiredExtensions.begin(), windowRequiredExtensions.end());
+        instanceLevelExtension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+        // Device level extensions -> only need swap chain
+        deviceLevelExtension.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    }
 
 #pragma endregion
 
@@ -56,10 +63,10 @@ int main()
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
-        createInfo.enabledLayerCount = validationLayers.size();
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-        createInfo.enabledExtensionCount = platformExtension.size();
-        createInfo.ppEnabledExtensionNames = platformExtension.data();
+        createInfo.enabledLayerCount = activeLayers.size();
+        createInfo.ppEnabledLayerNames = activeLayers.data();
+        createInfo.enabledExtensionCount = instanceLevelExtension.size();
+        createInfo.ppEnabledExtensionNames = instanceLevelExtension.data();
 
         auto createInstanceRet = ::vkCreateInstance(&createInfo, nullptr, &vkInstance);
         if (createInstanceRet != VK_SUCCESS)
@@ -165,7 +172,6 @@ int main()
     VkQueue deviceQueue;
     int queueFamilyIndex = -1;
     VkSurfaceKHR surface;
-    const char* deviceExtensions[1] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
     {
         uint32_t queueFamilyCount = 0;
@@ -202,10 +208,10 @@ int main()
 
         VkDeviceCreateInfo deviceCreateInfo = VkDeviceCreateInfo();
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCreateInfo.enabledExtensionCount = 1;
-        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
-        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+        deviceCreateInfo.enabledExtensionCount = deviceLevelExtension.size();
+        deviceCreateInfo.ppEnabledExtensionNames = deviceLevelExtension.data();
+        deviceCreateInfo.enabledLayerCount = activeLayers.size();
+        deviceCreateInfo.ppEnabledLayerNames = activeLayers.data();
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
@@ -228,6 +234,8 @@ int main()
     }
 
     // Clearup
+
+    ::vkDestroyDevice(logicDevice, nullptr);
 
     DestroyDebugUtilsMessengerEXT(vkInstance, vkDebugUtilExtHandle, nullptr);
 

@@ -106,12 +106,5 @@ namespace NWA
     private:
         inline static int _sGlobalWindowsCount = 0;
         inline static const wchar_t* _sWindowRegisterName = L"InfraWindow";
-
-    public:
-        class Vulkan
-        {
-        public:
-            static const std::vector<const char*>& GetRequiredInstanceExtensions();
-        };
     };
 }
