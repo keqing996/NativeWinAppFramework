@@ -240,7 +240,7 @@ int main()
 
 #pragma endregion
 
-#pragma region [Swap chain]
+#pragma region [Swapchain]
 
     VkSurfaceFormatKHR swapchainFormat;
 
@@ -326,6 +326,44 @@ int main()
 
 #pragma endregion
 
+    std::vector<VkImage> swapchainImages;
+    std::vector<VkImageView> swapchainImageViews;
+
+    {
+        uint32_t imageCount;
+        ::vkGetSwapchainImagesKHR(logicDevice, swapchain, &imageCount, nullptr);
+        swapchainImages.resize(imageCount);
+        ::vkGetSwapchainImagesKHR(logicDevice, swapchain, &imageCount, swapchainImages.data());
+
+        swapchainImageViews.resize(imageCount);
+
+        VkImageViewCreateInfo imageViewCreateInfo {};
+        imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format = swapchainFormat.format;
+        imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+        imageViewCreateInfo.subresourceRange.levelCount = 1;
+        imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+        imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+        for (std::size_t i = 0; i < swapchainImages.size(); i++)
+        {
+            imageViewCreateInfo.image = swapchainImages[i];
+
+            if (::vkCreateImageView(logicDevice, &imageViewCreateInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
+                throw std::runtime_error("failed to create swapchain image view!");
+        }
+    }
+
+#pragma region [Swapchain image view]
+
+#pragma endregion
+
     // Main loop
     while (true)
     {
@@ -336,6 +374,11 @@ int main()
     }
 
     // Clearup
+
+    for (auto imageView : swapchainImageViews)
+        ::vkDestroyImageView(logicDevice, imageView, nullptr);
+
+    ::vkDestroySwapchainKHR(logicDevice, swapchain, nullptr);
 
     ::vkDestroyDevice(logicDevice, nullptr);
 
