@@ -240,6 +240,92 @@ int main()
 
 #pragma endregion
 
+#pragma region [Swap chain]
+
+    VkSurfaceFormatKHR swapchainFormat;
+
+    {
+        // Foarmat -> find a format that supports RGBA
+        uint32_t surfaceFormatsCount = 0;
+        ::vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurface, &surfaceFormatsCount, nullptr);
+        std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
+        ::vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, vkSurface, &surfaceFormatsCount, surfaceFormats.data());
+
+        for (auto& [format, colorSpace]: surfaceFormats)
+        {
+            if ((format == VK_FORMAT_B8G8R8A8_UNORM) && (colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR))
+            {
+                swapchainFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
+                swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+                break;
+            }
+        }
+
+        if (swapchainFormat.format == VK_FORMAT_UNDEFINED)
+            throw std::runtime_error("failed to find suitable color format!");
+    }
+
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+    {
+        uint32_t presentModesCount;
+        ::vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurface, &presentModesCount, nullptr);
+        std::vector<VkPresentModeKHR> presentModes;
+        ::vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, vkSurface, &presentModesCount, presentModes.data());
+
+        for (auto mode: presentModes)
+        {
+            if (mode == VK_PRESENT_MODE_MAILBOX_KHR)    // Prefer mail box mode
+            {
+                presentMode = mode;
+                break;
+            }
+        }
+    }
+
+    VkSurfaceCapabilitiesKHR surfaceCapabilities {};
+
+    {
+        if (::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, vkSurface, &surfaceCapabilities) != VK_SUCCESS)
+            throw std::runtime_error("failed to query surface capabilities!");
+    }
+
+    VkExtent2D swapchainExtent;
+    VkSwapchainKHR swapchain;
+
+    {
+        auto Clamp = [](uint32_t value, uint32_t min, uint32_t max) -> uint32_t
+        {
+            return (value <= min) ? min : ((value >= max) ? max : value);
+        };
+
+        swapchainExtent.width  = Clamp(window.GetSize().first, surfaceCapabilities.minImageExtent.width,  surfaceCapabilities.maxImageExtent.width);
+        swapchainExtent.height = Clamp(window.GetSize().second, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+
+        uint32_t imageCount = Clamp(2, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
+
+        VkSwapchainCreateInfoKHR swapchainCreateInfo {};
+        swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        swapchainCreateInfo.surface = vkSurface;
+        swapchainCreateInfo.minImageCount = imageCount;
+        swapchainCreateInfo.imageFormat = swapchainFormat.format;
+        swapchainCreateInfo.imageColorSpace = swapchainFormat.colorSpace;
+        swapchainCreateInfo.imageExtent = swapchainExtent;
+        swapchainCreateInfo.imageArrayLayers = 1;
+        swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
+        swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        swapchainCreateInfo.presentMode = presentMode;
+        swapchainCreateInfo.clipped = VK_TRUE;
+        swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+        if (::vkCreateSwapchainKHR(logicDevice, &swapchainCreateInfo, nullptr, &swapchain) != VK_SUCCESS)
+            throw std::runtime_error("failed to create swap chain!");
+    }
+
+#pragma endregion
+
     // Main loop
     while (true)
     {
