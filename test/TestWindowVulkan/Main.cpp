@@ -3,6 +3,8 @@
 #include <vector>
 #include "NativeWinApp/Window.h"
 #include "NativeWinApp/Vulkan.h"
+#include "shader.vert.h"
+#include "shader.frag.h"
 
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
 
@@ -326,6 +328,8 @@ int main()
 
 #pragma endregion
 
+#pragma region [Swapchain image view]
+
     std::vector<VkImage> swapchainImages;
     std::vector<VkImageView> swapchainImageViews;
 
@@ -359,8 +363,6 @@ int main()
                 throw std::runtime_error("failed to create swapchain image view!");
         }
     }
-
-#pragma region [Swapchain image view]
 
 #pragma endregion
 
