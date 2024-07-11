@@ -150,37 +150,13 @@ int main()
     if (physicalDevice == VK_NULL_HANDLE)
         throw std::runtime_error("failed to find a suitable GPU!");
 
-    VkFormat depthFormat;
-
-    {
-        VkFormatProperties formatProperties {};
-        ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D24_UNORM_S8_UINT, &formatProperties);
-        if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
-            depthFormat = VK_FORMAT_D24_UNORM_S8_UINT;
-        else
-        {
-            ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT_S8_UINT, &formatProperties);
-
-            if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
-                depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-            else
-            {
-                ::vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT, &formatProperties);
-
-                if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
-                    depthFormat = VK_FORMAT_D32_SFLOAT;
-                else
-                    throw std::runtime_error("failed to find a suitable depth format!");
-            }
-        }
-    }
-
 #pragma endregion
 
 #pragma region [Logic device]
 
     VkDevice logicDevice;
     VkQueue deviceQueue;
+    int queueFamilyIndex = -1;
 
     {
         uint32_t queueFamilyCount = 0;
@@ -188,7 +164,6 @@ int main()
         std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyCount);
         ::vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
 
-        int queueFamilyIndex = -1;
         for (std::size_t i = 0; i < queueFamilyProperties.size(); i++)
         {
             // Support graphics
@@ -508,6 +483,55 @@ int main()
 
 #pragma endregion
 
+#pragma region [Frame buffer]
+
+    std::vector<VkFramebuffer> swapchainFramebuffers;
+
+    swapchainFramebuffers.resize(swapchainImageViews.size());
+
+    for (size_t i = 0; i < swapchainImageViews.size(); i++)
+    {
+        VkImageView attachments[] = { swapchainImageViews[i] };
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = renderPass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = swapchainExtent.width;
+        framebufferInfo.height = swapchainExtent.height;
+        framebufferInfo.layers = 1;
+
+        if (::vkCreateFramebuffer(logicDevice, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
+            throw std::runtime_error("failed to create framebuffer!");
+    }
+
+#pragma endregion
+
+#pragma region [Command pool & buffer]
+
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
+
+    VkCommandPoolCreateInfo poolInfo {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = queueFamilyIndex;
+
+    if (::vkCreateCommandPool(logicDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+        throw std::runtime_error("failed to create command pool!");
+
+    VkCommandBufferAllocateInfo allocInfo {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    if (::vkAllocateCommandBuffers(logicDevice, &allocInfo, &commandBuffer) != VK_SUCCESS)
+        throw std::runtime_error("failed to allocate command buffers!");
+
+#pragma endregion
+
     // Main loop
     while (true)
     {
@@ -518,6 +542,12 @@ int main()
     }
 
     // Clearup
+
+    ::vkDestroyCommandPool(logicDevice, commandPool, nullptr);
+
+    for (auto framebuffer : swapchainFramebuffers)
+        ::vkDestroyFramebuffer(logicDevice, framebuffer, nullptr);
+
     ::vkDestroyPipelineLayout(logicDevice, pipelineLayout, nullptr);
 
     ::vkDestroyRenderPass(logicDevice, renderPass, nullptr);
