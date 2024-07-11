@@ -3,8 +3,8 @@
 #include <vector>
 #include "NativeWinApp/Window.h"
 #include "NativeWinApp/Vulkan.h"
-#include "shader.vert.h"
-#include "shader.frag.h"
+#include "vert.h"
+#include "frag.h"
 
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
 
@@ -366,6 +366,101 @@ int main()
 
 #pragma endregion
 
+#pragma region [Shader module]
+
+    VkShaderModule vertShaderModule;
+    VkShaderModule fragShaderModule;
+
+    {
+        auto CreateShaderModule = [&logicDevice](const unsigned char* code, size_t size) -> VkShaderModule
+        {
+            VkShaderModuleCreateInfo createInfo {};
+            createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+            createInfo.codeSize = size;
+            createInfo.pCode = reinterpret_cast<const uint32_t*>(code);
+
+            VkShaderModule shaderModule;
+            if (::vkCreateShaderModule(logicDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+                throw std::runtime_error("failed to create shader module!");
+
+            return shaderModule;
+        };
+
+        vertShaderModule = CreateShaderModule(vert.data(), vert.size());
+        fragShaderModule = CreateShaderModule(frag.data(), frag.size());
+    }
+
+#pragma endregion
+
+#pragma region [Render pass]
+
+    VkRenderPass renderPass;
+    VkAttachmentDescription attachmentDescriptions[2];
+
+    // Color attachment
+    attachmentDescriptions[0] = VkAttachmentDescription();
+    attachmentDescriptions[0].format = swapchainFormat.format;
+    attachmentDescriptions[0].samples = VK_SAMPLE_COUNT_1_BIT;
+    attachmentDescriptions[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachmentDescriptions[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachmentDescriptions[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachmentDescriptions[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachmentDescriptions[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachmentDescriptions[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    // Depth attachment
+    attachmentDescriptions[1] = VkAttachmentDescription();
+    attachmentDescriptions[1].format = depthFormat;
+    attachmentDescriptions[1].samples = VK_SAMPLE_COUNT_1_BIT;
+    attachmentDescriptions[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachmentDescriptions[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachmentDescriptions[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachmentDescriptions[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachmentDescriptions[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachmentDescriptions[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference attachmentReferences[2];
+
+    attachmentReferences[0] = VkAttachmentReference();
+    attachmentReferences[0].attachment = 0;
+    attachmentReferences[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    attachmentReferences[1] = VkAttachmentReference();
+    attachmentReferences[1].attachment = 1;
+    attachmentReferences[1].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpassDescription = VkSubpassDescription();
+    subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpassDescription.colorAttachmentCount = 1;
+    subpassDescription.pColorAttachments = &attachmentReferences[0];
+    subpassDescription.pDepthStencilAttachment = &attachmentReferences[1];
+
+    VkSubpassDependency subpassDependency = VkSubpassDependency();
+    subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpassDependency.srcAccessMask = 0;
+    subpassDependency.dstSubpass = 0;
+    subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo renderPassCreateInfo = VkRenderPassCreateInfo();
+    renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassCreateInfo.attachmentCount = 2;
+    renderPassCreateInfo.pAttachments = attachmentDescriptions;
+    renderPassCreateInfo.subpassCount = 1;
+    renderPassCreateInfo.pSubpasses = &subpassDescription;
+    renderPassCreateInfo.dependencyCount = 1;
+    renderPassCreateInfo.pDependencies = &subpassDependency;
+
+    // Create the renderpass
+    if (::vkCreateRenderPass(device, &renderPassCreateInfo, 0, &renderPass) != VK_SUCCESS)
+    {
+        vulkanAvailable = false;
+        return;
+    }
+
+#pragma endregion
+
     // Main loop
     while (true)
     {
@@ -376,6 +471,9 @@ int main()
     }
 
     // Clearup
+
+    ::vkDestroyShaderModule(logicDevice, fragShaderModule, nullptr);
+    ::vkDestroyShaderModule(logicDevice, vertShaderModule, nullptr);
 
     for (auto imageView : swapchainImageViews)
         ::vkDestroyImageView(logicDevice, imageView, nullptr);
